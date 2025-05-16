@@ -1,5 +1,39 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/types/card";
+import OpenAI from "openai";
+
+const token = "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";
+const endpoint = "https://models.github.ai/inference";
+const model = "openai/gpt-4.1";
+
+export const generatecardByAi = async (level: string, category: string) => {
+  const client = new OpenAI({
+    baseURL: endpoint,
+    apiKey: token,
+    dangerouslyAllowBrowser: true,
+  });
+
+  const response = await client.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content:
+          'you are an object Json generator, in this form { "spanish_text": \n "english_text": \n "russian_text": \n "category":}',
+      },
+      {
+        role: "user",
+        content: `generate a quesion in Json form a card to learn spanish for ${level} A1 in theme ${category}`,
+      },
+    ],
+    temperature: 1,
+    top_p: 1,
+    model: model,
+  });
+
+  console.log(response.choices[0].message.content);
+  const generatedCard = response.choices[0].message.content;
+  return generatedCard;
+};
 
 export const fetchRandomCardByCategory = async (
   category: string

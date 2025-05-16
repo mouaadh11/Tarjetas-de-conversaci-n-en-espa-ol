@@ -14,11 +14,35 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card } from "@/types/card";
-import { Upload, FileUp, Check, X, FileWarning } from "lucide-react";
+import CsvForm from "@/components/Csvform";
+import {
+  Upload,
+  FileUp,
+  Check,
+  X,
+  FileWarning,
+  ChevronsUpDown,
+} from "lucide-react";
 import Papa from "papaparse";
-import { addCard, addCardsFromCSV } from "@/services/cardService";
+import {
+  addCard,
+  addCardsFromCSV,
+  generatecardByAi,
+} from "@/services/cardService";
 import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   spanish_text: z.string().min(1, "Spanish text is required"),
@@ -27,7 +51,13 @@ const formSchema = z.object({
   category: z.string().optional(),
 });
 
+const aiFormSchema = z.object({
+  level: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]).optional(),
+  category: z.string().optional(),
+});
+
 type FormValues = z.infer<typeof formSchema>;
+type AiFormValues = z.infer<typeof aiFormSchema>;
 
 const AddCard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +76,26 @@ const AddCard: React.FC = () => {
       category: "",
     },
   });
+  const formAi = useForm<AiFormValues>({
+    resolver: zodResolver(aiFormSchema),
+    defaultValues: {
+      level: "A1",
+      category: "",
+    },
+  });
+  const onSubmitAi = async (values: z.infer<typeof aiFormSchema>) => {
+    setIsSubmitting(true);
 
+    console.log(values);
+    const generatedCard = await generatecardByAi(values.level, values.category);
+    const data = JSON.parse(generatedCard);
+    form.setValue("spanish_text", data.spanish_text);
+    form.setValue("english_text", data.english_text);
+    form.setValue("russian_text", data.russian_text);
+    form.setValue("category", data.category);
+
+    setIsSubmitting(false);
+  };
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
@@ -181,199 +230,296 @@ const AddCard: React.FC = () => {
 
         <div className="max-w-3xl mx-auto">
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-6">
-              Agregar nueva tarjeta
-            </h2>
-
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <FormField
-                  control={form.control}
-                  name="spanish_text"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Texto en español (requerido)</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="¿Cómo te llamas?" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="english_text"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Traducción al inglés (opcional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="What is your name?" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="russian_text"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Traducción al ruso (opcional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Как вас зовут?" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Categoría (opcional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Introductions" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
+            {/* Add a card by form */}
+            <div>
+              <h2 className="text-2xl font-semibold mb-6">
+                Agregar nueva tarjeta
+              </h2>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
                 >
-                  Agregar tarjeta
-                </Button>
-              </form>
-            </Form>
+                  <FormField
+                    control={form.control}
+                    name="spanish_text"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Texto en español (requerido)</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="¿Cómo te llamas?" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <div className="mt-12">
-              <h3 className="text-xl font-semibold mb-4">
-                O cargar archivo CSV
-              </h3>
+                  <FormField
+                    control={form.control}
+                    name="english_text"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Traducción al inglés (opcional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="What is your name?" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <div
-                className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                  isDragging
-                    ? "border-cardBlue-500 bg-cardBlue-50"
-                    : "border-gray-300"
-                } ${csvError ? "border-red-300 bg-red-50" : ""}`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                {csvPreview.length === 0 && !csvError && (
-                  <>
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                    <p className="mt-2">Drag and drop your CSV file here, or</p>
-                    <label htmlFor="csv-upload" className="mt-2 inline-block">
-                      <span className="text-cardBlue-600 hover:text-cardBlue-700 cursor-pointer">
-                        haga clic para navegar
-                      </span>
-                      <input
-                        id="csv-upload"
-                        type="file"
-                        accept=".csv"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                      />
-                    </label>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Formato: Texto en español, Traducción al inglés,
-                      Traducción al ruso, Categoría
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Tamaño máximo de archivo: 1 MB
-                    </p>
-                  </>
-                )}
+                  <FormField
+                    control={form.control}
+                    name="russian_text"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Traducción al ruso (opcional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Как вас зовут?" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {csvError && (
-                  <div className="text-red-600">
-                    <FileWarning className="mx-auto h-12 w-12 text-red-400" />
-                    <p className="mt-2 font-medium">{csvError}</p>
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      onClick={cancelCsvUpload}
-                    >
-                      Try Again
-                    </Button>
-                  </div>
-                )}
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Categoría (opcional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Introductions" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {csvPreview.length > 0 && !csvError && (
-                  <div>
-                    <Check className="mx-auto h-12 w-12 text-green-500" />
-                    <p className="mt-2 font-medium text-green-600">
-                      {csvPreview.length} cards ready to upload
-                    </p>
-
-                    <div className="mt-4 max-h-60 overflow-y-auto border rounded-md">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-2 text-left">
-                              Spanish Text
-                            </th>
-                            <th className="px-4 py-2 text-left">
-                              English Translation
-                            </th>
-                            <th className="px-4 py-2 text-left">Category</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {csvPreview.slice(0, 5).map((card, index) => (
-                            <tr key={index} className="border-t">
-                              <td className="px-4 py-2">{card.spanish_text}</td>
-                              <td className="px-4 py-2">
-                                {card.english_text || "-"}
-                              </td>
-                              <td className="px-4 py-2">
-                                {card.category || "-"}
-                              </td>
-                            </tr>
-                          ))}
-                          {csvPreview.length > 5 && (
-                            <tr>
-                              <td
-                                colSpan={3}
-                                className="px-4 py-2 text-gray-500 text-center"
-                              >
-                                ...and {csvPreview.length - 5} more cards
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div className="mt-4 flex space-x-4 justify-center">
-                      <Button
-                        onClick={uploadCsvCards}
-                        className="bg-green-600 hover:bg-green-700"
-                        disabled={isSubmitting}
-                      >
-                        <FileUp className="mr-2 h-4 w-4" /> Upload{" "}
-                        {csvPreview.length} Cards
-                      </Button>
-                      <Button variant="outline" onClick={cancelCsvUpload}>
-                        <X className="mr-2 h-4 w-4" /> Cancel
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
+                  >
+                    Agregar tarjeta
+                  </Button>
+                </form>
+              </Form>
             </div>
+            {/* Generate it by AI */}
+            <div className="mt-12">
+              <Collapsible>
+                <CollapsibleTrigger>
+                  <Button
+                    variant="ghost"
+                    className="flex flex-row items-center mb-4 "
+                  >
+                    <h3 className="text-xl font-semibold">Generate it by AI</h3>
+                    <ChevronsUpDown className="ml-auto" />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <Form {...formAi}>
+                    <form
+                      onSubmit={formAi.handleSubmit(onSubmitAi)}
+                      className="space-y-8"
+                    >
+                      <FormField
+                        control={formAi.control}
+                        name="category"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Categoria</FormLabel>
+                            <FormControl>
+                              <Input placeholder="eg. Ropa" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={formAi.control}
+                        name="level"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a level" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="A1">A1</SelectItem>
+                                <SelectItem value="A2">A2</SelectItem>
+                                <SelectItem value="B1">B1</SelectItem>
+                                <SelectItem value="B2">B2</SelectItem>
+                                <SelectItem value="C1">C1</SelectItem>
+                                <SelectItem value="C2">C2</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
+                      >
+                        Submit
+                      </Button>
+                    </form>
+                  </Form>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+            {/* upload CSV */}
+            {/* <div className="mt-12">
+              <Collapsible>
+                <CollapsibleTrigger>
+                  <Button
+                    variant="ghost"
+                    className="flex flex-row items-center mb-4 "
+                  >
+                    <h3 className="text-xl font-semibold">
+                      O cargar archivo CSV
+                    </h3>
+                    <ChevronsUpDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                      isDragging
+                        ? "border-cardBlue-500 bg-cardBlue-50"
+                        : "border-gray-300"
+                    } ${csvError ? "border-red-300 bg-red-50" : ""}`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    {csvPreview.length === 0 && !csvError && (
+                      <>
+                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                        <p className="mt-2">
+                          Drag and drop your CSV file here, or
+                        </p>
+                        <label
+                          htmlFor="csv-upload"
+                          className="mt-2 inline-block"
+                        >
+                          <span className="text-cardBlue-600 hover:text-cardBlue-700 cursor-pointer">
+                            haga clic para navegar
+                          </span>
+                          <input
+                            id="csv-upload"
+                            type="file"
+                            accept=".csv"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Formato: Texto en español, Traducción al inglés,
+                          Traducción al ruso, Categoría
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Tamaño máximo de archivo: 1 MB
+                        </p>
+                      </>
+                    )}
+
+                    {csvError && (
+                      <div className="text-red-600">
+                        <FileWarning className="mx-auto h-12 w-12 text-red-400" />
+                        <p className="mt-2 font-medium">{csvError}</p>
+                        <Button
+                          variant="outline"
+                          className="mt-4"
+                          onClick={cancelCsvUpload}
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    )}
+
+                    {csvPreview.length > 0 && !csvError && (
+                      <div>
+                        <Check className="mx-auto h-12 w-12 text-green-500" />
+                        <p className="mt-2 font-medium text-green-600">
+                          {csvPreview.length} cards ready to upload
+                        </p>
+
+                        <div className="mt-4 max-h-60 overflow-y-auto border rounded-md">
+                          <table className="w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-2 text-left">
+                                  Spanish Text
+                                </th>
+                                <th className="px-4 py-2 text-left">
+                                  English Translation
+                                </th>
+                                <th className="px-4 py-2 text-left">
+                                  Category
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {csvPreview.slice(0, 5).map((card, index) => (
+                                <tr key={index} className="border-t">
+                                  <td className="px-4 py-2">
+                                    {card.spanish_text}
+                                  </td>
+                                  <td className="px-4 py-2">
+                                    {card.english_text || "-"}
+                                  </td>
+                                  <td className="px-4 py-2">
+                                    {card.category || "-"}
+                                  </td>
+                                </tr>
+                              ))}
+                              {csvPreview.length > 5 && (
+                                <tr>
+                                  <td
+                                    colSpan={3}
+                                    className="px-4 py-2 text-gray-500 text-center"
+                                  >
+                                    ...and {csvPreview.length - 5} more cards
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <div className="mt-4 flex space-x-4 justify-center">
+                          <Button
+                            onClick={uploadCsvCards}
+                            className="bg-green-600 hover:bg-green-700"
+                            disabled={isSubmitting}
+                          >
+                            <FileUp className="mr-2 h-4 w-4" /> Upload{" "}
+                            {csvPreview.length} Cards
+                          </Button>
+                          <Button variant="outline" onClick={cancelCsvUpload}>
+                            <X className="mr-2 h-4 w-4" /> Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div> */}
+            <CsvForm
+              setIsSubmitting={setIsSubmitting}
+              isSubmitting={isSubmitting}
+            />
           </div>
         </div>
       </div>
