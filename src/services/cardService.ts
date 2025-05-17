@@ -1,38 +1,84 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/types/card";
+import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
+import { AzureKeyCredential } from "@azure/core-auth";
 import OpenAI from "openai";
+import { env } from "process";
 
-const token = "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";
+const token = import.meta.env.VITE_GITHUB_TOKEN;
 const endpoint = "https://models.github.ai/inference";
-const model = "openai/gpt-4.1";
+const model = "deepseek/DeepSeek-V3-0324";
+
+// const endpoint = "https://models.github.ai/inference";
+// const model = "openai/gpt-4.1";
 
 export const generatecardByAi = async (level: string, category: string) => {
-  const client = new OpenAI({
-    baseURL: endpoint,
-    apiKey: token,
-    dangerouslyAllowBrowser: true,
+  // const client = new OpenAI({
+  //   baseURL: endpoint,
+  //   apiKey: token,
+  //   dangerouslyAllowBrowser: true,
+  // });
+  // const response = await client.chat.completions.create({
+  //   messages: [
+  //     {
+  //       role: "system",
+  //       content:
+  //         'you are an object Json generator, in this form { "spanish_text": \n "english_text": \n "russian_text": \n "category":}',
+  //     },
+  //     {
+  //       role: "user",
+  //       content: `generate question to learn spanish for ${level} A1 in theme ${category}, the response should be in a Json form and if the theme is set to "Random" keep the field empty`,
+  //     },
+  //   ],
+  //   temperature: 1,
+  //   top_p: 1,
+  //   model: model,
+  // });
+  const client = ModelClient(endpoint, new AzureKeyCredential(token));
+  console.log(category, level);
+  const noise = Math.random().toString(36).substring(2, 7);
+  const response = await client.path("/chat/completions").post({
+    body: {
+      messages: [
+        {
+          role: "system",
+          content: `You are a helpful assistant that generates ONLY JSON output. The format should always be:
+  
+  {
+    "spanish_text": "...",
+    "english_text": "...",
+    "russian_text": "...",
+    "category": "..."
+  }
+  
+  Do not include any explanation or extra text. Return ONLY the JSON object.`,
+        },
+        {
+          role: "user",
+          content: `Generate a different simple conversational Spanish learning question for level ${level} (e.g., A1). Theme: ${category}.
+  
+If the theme is "Random", choose a random topic appropriate for the level.
+          
+  - If the theme is "Random", change the "category" field to a real category. 
+  - Translate the question into English and Russian.
+  - Output ONLY the JSON object.
+  - Request ID: ${noise}`,
+        },
+      ],
+      temperature: 1.0, // more creativity
+      top_p: 1,
+      max_tokens: 2048,
+      model: model,
+    },
   });
 
-  const response = await client.chat.completions.create({
-    messages: [
-      {
-        role: "system",
-        content:
-          'you are an object Json generator, in this form { "spanish_text": \n "english_text": \n "russian_text": \n "category":}',
-      },
-      {
-        role: "user",
-        content: `generate a quesion in Json form a card to learn spanish for ${level} A1 in theme ${category}`,
-      },
-    ],
-    temperature: 1,
-    top_p: 1,
-    model: model,
-  });
+  if (isUnexpected(response)) {
+    throw response.body.error;
+  }
 
-  console.log(response.choices[0].message.content);
-  const generatedCard = response.choices[0].message.content;
-  return generatedCard;
+  console.log(response.body.choices[0].message.content);
+  const generatedCard = response.body.choices[0].message.content;
+  return generatedCard.replace(/```json|```/g, "").trim();
 };
 
 export const fetchRandomCardByCategory = async (

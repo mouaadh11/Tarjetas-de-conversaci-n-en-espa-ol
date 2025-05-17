@@ -66,25 +66,35 @@ const Index = () => {
         <div className="my-12">
           <div className="flex flex-row justify-between">
             <h2 className="text-2xl font-semibold mb-6 flex items-center">
-              <span className="bg-gradient-to-r from-cardBlue-700 to-cardBlue-500 w-1.5 h-6 rounded mr-2 inline-block"></span>
+              <span className="bg-cardBlue-700 w-1.5 h-6 rounded mr-2 inline-block"></span>
               Todas las tarjetas
             </h2>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={toggleReveal}
-            >
-              {isRevealed ? (
-                <>
-                  <EyeOff className="h-4 w-4 mr-1" /> Hide Todas
-                </>
-              ) : (
-                <>
-                  <Eye className="h-4 w-4 mr-1" /> Reveal Todas
-                </>
-              )}
-            </Button>
+            <div className="flex flex-row-reverse gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={toggleReveal}
+              >
+                {isRevealed ? (
+                  <>
+                    <EyeOff className="h-4 w-4 mr-1" /> Hide Todas
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4 mr-1" /> Reveal Todas
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                disabled
+              >
+                <Trash2 className="h-4 w-4 mr-1" /> Delete
+              </Button>
+            </div>
           </div>
 
           {isLoading ? (

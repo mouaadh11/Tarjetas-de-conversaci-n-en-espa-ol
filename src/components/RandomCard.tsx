@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 
+
 interface RandomCardProps {
   onDeleteCard?: (id: string) => void;
 }

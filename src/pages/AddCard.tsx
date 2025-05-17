@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
   spanish_text: z.string().min(1, "Spanish text is required"),
@@ -58,6 +59,7 @@ const aiFormSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 type AiFormValues = z.infer<typeof aiFormSchema>;
+import { useRef } from "react";
 
 const AddCard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,6 +67,7 @@ const AddCard: React.FC = () => {
   const [csvPreview, setCsvPreview] = useState<
     Omit<Card, "id" | "created_at">[]
   >([]);
+  const [aiFormIsOpen, setAiFormIsOpen] = useState(false);
   const [csvError, setCsvError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
@@ -83,18 +86,48 @@ const AddCard: React.FC = () => {
       category: "",
     },
   });
+  const targetRef = useRef<HTMLDivElement>(null);
+
+  const handleRedirect = () => {
+    targetRef.current?.scrollIntoView({ behavior: "smooth" });
+    setAiFormIsOpen(false);
+  };
+
   const onSubmitAi = async (values: z.infer<typeof aiFormSchema>) => {
     setIsSubmitting(true);
 
-    console.log(values);
-    const generatedCard = await generatecardByAi(values.level, values.category);
-    const data = JSON.parse(generatedCard);
-    form.setValue("spanish_text", data.spanish_text);
-    form.setValue("english_text", data.english_text);
-    form.setValue("russian_text", data.russian_text);
-    form.setValue("category", data.category);
+    try {
+      const category = values.category === "" ? "Random" : values.category;
+      const level = values.level;
 
-    setIsSubmitting(false);
+      console.log("Generating card for:", level, category);
+
+      const generatedCard = await generatecardByAi(level, category);
+
+      // Attempt to parse the generated JSON
+      const data = JSON.parse(generatedCard);
+
+      // Set form values
+      form.setValue("spanish_text", data.spanish_text);
+      form.setValue("english_text", data.english_text);
+      form.setValue("russian_text", data.russian_text);
+      form.setValue("category", data.category);
+
+      toast({
+        title: "Generated",
+        description: "Generated succesfully",
+      });
+      handleRedirect();
+    } catch (error) {
+      console.error("Failed to generate or parse card:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate card",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
@@ -231,7 +264,7 @@ const AddCard: React.FC = () => {
         <div className="max-w-3xl mx-auto">
           <div className="bg-white p-6 rounded-lg shadow-md">
             {/* Add a card by form */}
-            <div>
+            <div ref={targetRef}>
               <h2 className="text-2xl font-semibold mb-6">
                 Agregar nueva tarjeta
               </h2>
@@ -295,21 +328,22 @@ const AddCard: React.FC = () => {
                       </FormItem>
                     )}
                   />
-
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
-                  >
-                    Agregar tarjeta
-                  </Button>
+                  <div className="flex flex-row gap-2">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
+                    >
+                      Agregar tarjeta
+                    </Button>
+                  </div>
                 </form>
               </Form>
             </div>
             {/* Generate it by AI */}
             <div className="mt-12">
-              <Collapsible>
-                <CollapsibleTrigger>
+              <Collapsible open={aiFormIsOpen} onOpenChange={setAiFormIsOpen}>
+                <CollapsibleTrigger asChild>
                   <Button
                     variant="ghost"
                     className="flex flex-row items-center mb-4 "
@@ -365,13 +399,16 @@ const AddCard: React.FC = () => {
                           </FormItem>
                         )}
                       />
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
-                      >
-                        Submit
-                      </Button>
+                      <div className="flex flex-row gap-2">
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
+                        >
+                          Submit
+                        </Button>
+                        {isSubmitting && <Spinner />}
+                      </div>
                     </form>
                   </Form>
                 </CollapsibleContent>

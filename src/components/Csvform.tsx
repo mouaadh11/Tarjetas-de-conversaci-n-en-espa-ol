@@ -131,7 +131,7 @@ const CsvForm: React.FC<CsvFormProps> = ({ setIsSubmitting, isSubmitting }) => {
   return (
     <div className="mt-12">
       <Collapsible>
-        <CollapsibleTrigger>
+        <CollapsibleTrigger asChild>
           <Button variant="ghost" className="flex flex-row items-center mb-4 ">
             <h3 className="text-xl font-semibold">O cargar archivo CSV</h3>
             <ChevronsUpDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />

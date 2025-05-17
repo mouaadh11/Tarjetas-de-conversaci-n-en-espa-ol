@@ -3,6 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card as CardType } from "@/types/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CardProps extends CardType {
   hideRevealButton?: boolean;
@@ -66,7 +83,7 @@ const Card: React.FC<CardProps> = ({
         {english_text && (
           <div
             className={cn(
-              "text-gray-600  transition-all duration-300",
+              "text-gray-600  transition-all duration-300 mb-2",
               !localRevealed && "blurred",
               localRevealed && "animate-card-reveal"
             )}
@@ -88,16 +105,59 @@ const Card: React.FC<CardProps> = ({
       </div>
 
       <div className="flex flex-row-reverse justify-between mt-2">
-        {onDelete && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-4 w-4 mr-1" /> Delete
-          </Button>
-        )}
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            {!localRevealed ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      {onDelete && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          disabled
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" /> Delete
+                        </Button>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Revealed the card first</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              onDelete && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" /> Delete
+                </Button>
+              )
+            )}
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the
+                card and remove it form your card list.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         {!hideRevealButton && (
           <Button
             variant="outline"
@@ -105,7 +165,7 @@ const Card: React.FC<CardProps> = ({
             className="flex items-center gap-1"
             onClick={toggleReveal}
           >
-            {isRevealed ? (
+            {localRevealed ? (
               <>
                 <EyeOff className="h-4 w-4 mr-1" /> Hide
               </>
