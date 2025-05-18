@@ -1,3 +1,4 @@
+import { FilePlus2, House } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -16,15 +17,17 @@ const Header: React.FC = () => {
         <nav className="flex justify-center mt-6 space-x-4">
           <Link
             to="/"
-            className="px-4 py-2 text-gray-600 hover:text-cardBlue-700 font-bold text-xl"
+            className="flex flex-row gap-2 items-center px-4 py-2 text-gray-600 hover:text-cardBlue-700 font-bold text-xl"
           >
-            🏠 pagina principal
+            
+                <House />
+                pagina principal
           </Link>
           <Link
             to="/add"
-            className="px-4 py-2 text-gray-600 hover:text-cardBlue-700 font-bold text-xl"
+            className="flex flex-row gap-2 px-4 py-2 text-gray-600 hover:text-cardBlue-700 font-bold text-xl"
           >
-            ➕ agregar tarjeta
+            <FilePlus2 /> agregar tarjeta
           </Link>
         </nav>
       </div>
