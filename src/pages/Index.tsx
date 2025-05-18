@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { CardProvider } from "@/context/CardContext";
 
 const Index = () => {
   const [cards, setCards] = useState<Card[]>([]);
@@ -102,7 +103,7 @@ const Index = () => {
           variant: "destructive",
         });
       }
-      loadCards(); // or refetch cards
+      // loadCards(); // or refetch cards
     } else {
       toast({
         title: "No card selected",
@@ -120,117 +121,119 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <Header />
+    <CardProvider loadCards={loadCards}>
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 py-8">
+          <Header />
 
-        <RandomCard onDeleteCard={handleDeleteCard} />
+          <RandomCard onDeleteCard={handleDeleteCard} />
 
-        <div className="my-12">
-          <div className="flex flex-row justify-between">
-            <h2 className="text-2xl font-semibold mb-6 flex items-center">
-              <span className="bg-cardBlue-700 w-1.5 h-6 rounded mr-2 inline-block"></span>
-              Todas las tarjetas
-            </h2>
-            <div className="flex flex-row-reverse gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={toggleReveal}
-              >
-                {isRevealed ? (
-                  <>
-                    <EyeOff className="h-4 w-4 mr-1" /> Hide Todas
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4 mr-1" /> Reveal Todas
-                  </>
-                )}
-              </Button>
-
-              {showCheckbox ? (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      onClick={selectedIds.length === 0 && handleMultiDelete}
-                    >
-                      <Trash2 />
-                      Delete Selected ({selectedIds.length})
-                    </Button>
-                  </AlertDialogTrigger>
-                  {selectedIds.length !== 0 && (
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the
-                        card and remove it form your card list.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction asChild>
-                          <Button
-                            variant="destructive"
-                            className="bg-red-400 hover:bg-red-500"
-                            onClick={
-                              !showCheckbox
-                                ? toggleShowCheckbox
-                                : handleMultiDelete
-                            }
-                          >
-                            <Trash2 />
-                            Delete Selected ({selectedIds.length})
-                          </Button>
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  )}
-                </AlertDialog>
-              ) : (
-                <Button variant="destructive" onClick={toggleShowCheckbox}>
-                  <Trash2 />
-                  Delete
-                </Button>
-              )}
-
-              {showCheckbox && (
+          <div className="my-12">
+            <div className="flex flex-row justify-between">
+              <h2 className="text-2xl font-semibold mb-6 flex items-center">
+                <span className="bg-cardBlue-700 w-1.5 h-6 rounded mr-2 inline-block"></span>
+                Todas las tarjetas
+              </h2>
+              <div className="flex flex-row-reverse gap-3">
                 <Button
-                  onClick={(checked) => {
-                    selectedIds.length !== cards.length
-                      ? setSelectedIds(checked ? cards.map((c) => c.id) : [])
-                      : setSelectedIds([]);
-                  }}
-                  disabled={cards.length === 0}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={toggleReveal}
                 >
-                  <ArrowDownWideNarrow />
+                  {isRevealed ? (
+                    <>
+                      <EyeOff className="h-4 w-4 mr-1" /> Hide Todas
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4 mr-1" /> Reveal Todas
+                    </>
+                  )}
                 </Button>
-              )}
-            </div>
-          </div>
 
-          {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">Loading cards...</p>
+                {showCheckbox ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        onClick={selectedIds.length === 0 && handleMultiDelete}
+                      >
+                        <Trash2 />
+                        Delete Selected ({selectedIds.length})
+                      </Button>
+                    </AlertDialogTrigger>
+                    {selectedIds.length !== 0 && (
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you absolutely sure?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete
+                            the card and remove it form your card list.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction asChild>
+                            <Button
+                              variant="destructive"
+                              className="bg-red-400 hover:bg-red-500"
+                              onClick={
+                                !showCheckbox
+                                  ? toggleShowCheckbox
+                                  : handleMultiDelete
+                              }
+                            >
+                              <Trash2 />
+                              Delete Selected ({selectedIds.length})
+                            </Button>
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    )}
+                  </AlertDialog>
+                ) : (
+                  <Button variant="destructive" onClick={toggleShowCheckbox}>
+                    <Trash2 />
+                    Delete
+                  </Button>
+                )}
+
+                {showCheckbox && (
+                  <Button
+                    onClick={(checked) => {
+                      selectedIds.length !== cards.length
+                        ? setSelectedIds(checked ? cards.map((c) => c.id) : [])
+                        : setSelectedIds([]);
+                    }}
+                    disabled={cards.length === 0}
+                  >
+                    <ArrowDownWideNarrow />
+                  </Button>
+                )}
+              </div>
             </div>
-          ) : (
-            <CardGrid
-              cards={cards}
-              onDeleteCard={handleDeleteCard}
-              isRevealed={isRevealed}
-              handleCardSelection={handleCardSelection}
-              selectedIds={selectedIds}
-              showCheckbox={showCheckbox}
-            />
-          )}
+
+            {isLoading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Loading cards...</p>
+              </div>
+            ) : (
+              <CardGrid
+                cards={cards}
+                onDeleteCard={handleDeleteCard}
+                isRevealed={isRevealed}
+                handleCardSelection={handleCardSelection}
+                selectedIds={selectedIds}
+                showCheckbox={showCheckbox}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </CardProvider>
   );
 };
 

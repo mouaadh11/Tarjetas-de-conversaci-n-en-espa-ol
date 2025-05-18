@@ -8,44 +8,45 @@ import { env } from "process";
 // const token = import.meta.env.VITE_GITHUB_TOKEN;
 // const endpoint = "https://models.github.ai/inference";
 // const model = "deepseek/DeepSeek-V3-0324";
+
+//   const response = await client.chat.completions.create({
+//     messages: [
+//       {
+//         role: "system",
+//         content: `You are a helpful and so creative assistant and every time you generate a new ideas and questions more fun even if it is the same prompt, Each response must be different from any previous example. Avoid repeating previous categories or sentence structures. Be surprising! generate ONLY JSON output. The format should always be:
+
+//   {
+//     "spanish_text": "...",
+//     "english_text": "...",
+//     "russian_text": "...",
+//     "category": "..."
+//   }
+
+//   Do not include any explanation or extra text. Return ONLY the JSON object.`,
+//       },
+//       {
+//         role: "user",
+//         content: `- Request ID: ${noise}, Generate a different simple conversational Spanish learning question for level ${level} (e.g., A1). Theme: ${category}.
+
+// If the theme is "Random", choose a random topic appropriate for the level.
+
+//   - If the theme is "Random", change the "category" field to a real category.
+//   - Translate the question into English and Russian.
+//   - Output ONLY the JSON object.`,
+//       },
+//     ],
+//     temperature: 1,
+//     top_p: 1,
+//     model: model,
+//   });
+
 const token = import.meta.env.VITE_GITHUB_TOKEN;
 const endpoint = "https://models.github.ai/inference";
 const model = "openai/gpt-4.1";
-
 export const generatecardByAi = async (level: string, category: string) => {
   const noise = Math.random().toString(36).substring(2, 7);
   const client = ModelClient(endpoint, new AzureKeyCredential(token));
 
-  //   const response = await client.chat.completions.create({
-  //     messages: [
-  //       {
-  //         role: "system",
-  //         content: `You are a helpful and so creative assistant and every time you generate a new ideas and questions more fun even if it is the same prompt, Each response must be different from any previous example. Avoid repeating previous categories or sentence structures. Be surprising! generate ONLY JSON output. The format should always be:
-
-  //   {
-  //     "spanish_text": "...",
-  //     "english_text": "...",
-  //     "russian_text": "...",
-  //     "category": "..."
-  //   }
-
-  //   Do not include any explanation or extra text. Return ONLY the JSON object.`,
-  //       },
-  //       {
-  //         role: "user",
-  //         content: `- Request ID: ${noise}, Generate a different simple conversational Spanish learning question for level ${level} (e.g., A1). Theme: ${category}.
-
-  // If the theme is "Random", choose a random topic appropriate for the level.
-
-  //   - If the theme is "Random", change the "category" field to a real category.
-  //   - Translate the question into English and Russian.
-  //   - Output ONLY the JSON object.`,
-  //       },
-  //     ],
-  //     temperature: 1,
-  //     top_p: 1,
-  //     model: model,
-  //   });
   const response = await client.path("/chat/completions").post({
     body: {
       messages: [
@@ -208,6 +209,25 @@ export const addCard = async (
 
   if (error) {
     console.error("Error adding card:", error);
+    throw error;
+  }
+
+  return data;
+};
+export const updateCard = async (
+  id: string,
+  updatedFields: Partial<Omit<Card, "id" | "created_at">>
+): Promise<Card | null> => {
+  console.log(id, updatedFields)
+  const { data, error } = await supabase
+    .from("cards")
+    .update(updatedFields)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating card:", error);
     throw error;
   }
 

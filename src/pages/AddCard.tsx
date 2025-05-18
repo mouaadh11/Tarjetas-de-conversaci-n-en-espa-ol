@@ -375,7 +375,7 @@ const AddCard: React.FC = () => {
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>working on it ...</p>
+                                <p>coming soon...</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
