@@ -20,12 +20,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CardProps extends CardType {
   hideRevealButton?: boolean;
   className?: string;
   onDelete?: (id: string) => void;
   isRevealed: boolean;
+  handleCardSelection?(id: string, checked: boolean);
+  selectedIds?: string[];
+  showCheckbox?: boolean;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -38,6 +42,9 @@ const Card: React.FC<CardProps> = ({
   onDelete,
   hideRevealButton,
   isRevealed,
+  handleCardSelection,
+  selectedIds,
+  showCheckbox,
 }) => {
   const [localRevealed, setLocalRevealed] = useState<boolean>(isRevealed);
   useEffect(() => {
@@ -57,11 +64,19 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       className={cn(
-        "relative bg-white rounded-lg shadow-md p-6 overflow-hidden transition-all duration-300 hover:shadow-lg border flex flex-col justify-between",
+        "relative bg-white rounded-lg shadow-md p-6 overflow-hidden transition-all duration-300 hover:shadow-lg border flex flex-col justify-between ",
         className
       )}
     >
       <div>
+        <div className="absolute top-2 right-2">
+          {showCheckbox && <Checkbox
+            checked={selectedIds.includes(id)}
+            onCheckedChange={(checked: boolean) =>
+              handleCardSelection(id, checked)
+            }
+          />}
+        </div>
         {category != "indefinida" ? (
           <span className="inline-block px-3 py-1 text-xs font-semibold text-cardBlue-700 bg-cardBlue-100 rounded-full mb-3">
             {category}
@@ -105,7 +120,6 @@ const Card: React.FC<CardProps> = ({
       </div>
 
       <div className="flex flex-row-reverse justify-between mt-2">
-
         <AlertDialog>
           <AlertDialogTrigger asChild>
             {!localRevealed ? (

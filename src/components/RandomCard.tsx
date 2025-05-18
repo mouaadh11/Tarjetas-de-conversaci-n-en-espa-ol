@@ -83,7 +83,7 @@ const RandomCard: React.FC<RandomCardProps> = ({ onDeleteCard }) => {
           variant: "destructive",
         });
       }
-      else if (fetchedCard) {
+      else if (fetchedCard?.id) {
         const card = fetchedCard;
         setRandomCard(card);
         toast({
@@ -111,7 +111,7 @@ const RandomCard: React.FC<RandomCardProps> = ({ onDeleteCard }) => {
 
   return (
     <div className="mb-10">
-      {randomCard && (
+      {randomCard?.id && (
         <div className="animate-fade-in">
           <div className="relative max-w-2xl mx-auto mb-8">
             <Card
@@ -123,6 +123,7 @@ const RandomCard: React.FC<RandomCardProps> = ({ onDeleteCard }) => {
                 onDeleteCard?.(id); // call parent if needed
                 closeRendomCard(); // close the random card
               }}
+              
             />
           </div>
         </div>

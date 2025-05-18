@@ -6,12 +6,25 @@ import { fetchCards, deleteCard } from "@/services/cardService";
 import { Card } from "@/types/card";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Trash2 } from "lucide-react";
+import { ArrowDownWideNarrow, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Index = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [showCheckbox, setShowCheckbox] = useState(false);
 
   useEffect(() => {
     loadCards();
@@ -55,6 +68,55 @@ const Index = () => {
   const toggleReveal = () => {
     setIsRevealed(!isRevealed);
   };
+  const toggleShowCheckbox = () => {
+    setShowCheckbox(!showCheckbox);
+    !isRevealed && toggleReveal();
+  };
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const handleCardSelection = (id: string, checked: boolean) => {
+    setSelectedIds((prev) =>
+      checked ? [...prev, id] : prev.filter((cardId) => cardId !== id)
+    );
+  };
+  const deleteCardsByIds = async (selectedIds) => {
+    if (selectedIds.length !== 0) {
+      try {
+        // Wait for all deletions to complete
+        await Promise.all(selectedIds.map((cardId) => deleteCard(cardId)));
+
+        // Remove all deleted cards from the state in one go
+        setCards((prevCards) =>
+          prevCards.filter((card) => !selectedIds.includes(card.id))
+        );
+
+        toast({
+          title: "Success",
+          description: "Selected cards deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error deleting cards:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete one or more cards",
+          variant: "destructive",
+        });
+      }
+      loadCards(); // or refetch cards
+    } else {
+      toast({
+        title: "No card selected",
+        variant: "destructive",
+      });
+    }
+  };
+  const handleMultiDelete = async () => {
+    // Optional: show confirm dialog
+    await deleteCardsByIds(selectedIds);
+    console.log(selectedIds);
+    setSelectedIds([]);
+    toggleShowCheckbox();
+  };
 
   return (
     <div className="min-h-screen">
@@ -86,14 +148,68 @@ const Index = () => {
                   </>
                 )}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                disabled
-              >
-                <Trash2 className="h-4 w-4 mr-1" /> Delete
-              </Button>
+
+              {showCheckbox ? (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      onClick={selectedIds.length === 0 && handleMultiDelete}
+                    >
+                      <Trash2 />
+                      Delete Selected ({selectedIds.length})
+                    </Button>
+                  </AlertDialogTrigger>
+                  {selectedIds.length !== 0 && (
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete your account and remove your data from our
+                          servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction asChild>
+                          <Button
+                            variant="destructive"
+                            onClick={
+                              !showCheckbox
+                                ? toggleShowCheckbox
+                                : handleMultiDelete
+                            }
+                          >
+                            <Trash2 />
+                            Delete Selected ({selectedIds.length})
+                          </Button>
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  )}
+                </AlertDialog>
+              ) : (
+                <Button variant="destructive" onClick={toggleShowCheckbox}>
+                  <Trash2 />
+                  Delete
+                </Button>
+              )}
+
+              {showCheckbox && (
+                <Button
+                  onClick={(checked) => {
+                    selectedIds.length !== cards.length
+                      ? setSelectedIds(checked ? cards.map((c) => c.id) : [])
+                      : setSelectedIds([]);
+                  }}
+                  disabled={cards.length === 0}
+                >
+                  <ArrowDownWideNarrow />
+                </Button>
+              )}
             </div>
           </div>
 
@@ -106,6 +222,9 @@ const Index = () => {
               cards={cards}
               onDeleteCard={handleDeleteCard}
               isRevealed={isRevealed}
+              handleCardSelection={handleCardSelection}
+              selectedIds={selectedIds}
+              showCheckbox={showCheckbox}
             />
           )}
         </div>

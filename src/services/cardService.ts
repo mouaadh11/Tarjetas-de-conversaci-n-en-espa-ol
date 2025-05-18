@@ -42,7 +42,7 @@ export const generatecardByAi = async (level: string, category: string) => {
       messages: [
         {
           role: "system",
-          content: `You are a helpful assistant that generates ONLY JSON output. The format should always be:
+          content: `You are a helpful and so creative assistant and every time you generate a new ideas and questions more fun even if it is the same prompt, Each response must be different from any previous example. Avoid repeating previous categories or sentence structures. Be surprising! generate ONLY JSON output. The format should always be:
   
   {
     "spanish_text": "...",
@@ -55,14 +55,13 @@ export const generatecardByAi = async (level: string, category: string) => {
         },
         {
           role: "user",
-          content: `Generate a different simple conversational Spanish learning question for level ${level} (e.g., A1). Theme: ${category}.
+          content: `- Request ID: ${noise}, Generate a different simple conversational Spanish learning question for level ${level} (e.g., A1). Theme: ${category}.
   
 If the theme is "Random", choose a random topic appropriate for the level.
           
   - If the theme is "Random", change the "category" field to a real category. 
   - Translate the question into English and Russian.
-  - Output ONLY the JSON object.
-  - Request ID: ${noise}`,
+  - Output ONLY the JSON object.`,
         },
       ],
       temperature: 1.0, // more creativity
@@ -76,7 +75,7 @@ If the theme is "Random", choose a random topic appropriate for the level.
     throw response.body.error;
   }
 
-  console.log(response.body.choices[0].message.content);
+  console.log(response.body.choices[0].message.content, noise);
   const generatedCard = response.body.choices[0].message.content;
   return generatedCard.replace(/```json|```/g, "").trim();
 };

@@ -44,6 +44,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   spanish_text: z.string().min(1, "Spanish text is required"),
@@ -60,6 +69,9 @@ const aiFormSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 type AiFormValues = z.infer<typeof aiFormSchema>;
 import { useRef } from "react";
+import { Label } from "@/components/ui/label";
+import { Sparkles } from "lucide-react";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 const AddCard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -328,7 +340,7 @@ const AddCard: React.FC = () => {
                       </FormItem>
                     )}
                   />
-                  <div className="flex flex-row gap-2">
+                  <div className="flex flex-row-reverse justify-between items-center">
                     <Button
                       type="submit"
                       disabled={isSubmitting}
@@ -336,12 +348,99 @@ const AddCard: React.FC = () => {
                     >
                       Agregar tarjeta
                     </Button>
+                    <div className="flex flex-row gap-3">
+                      {isSubmitting && <Spinner />}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="default"
+                            className="flex flex-row items-center bg-cardBlue-200 hover:bg-cardBlue-500 text-black"
+                          >
+                            Generate it by AI
+                            <Sparkles className="ml-auto" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>Edit profile</DialogTitle>
+                            <DialogDescription>
+                              Make changes to your profile here. Click save when
+                              you're done.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <Form {...formAi}>
+                            <form
+                              onSubmit={formAi.handleSubmit(onSubmitAi)}
+                              className="space-y-8"
+                            >
+                              <FormField
+                                control={formAi.control}
+                                name="category"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Categoria</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        placeholder="eg. Ropa"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={formAi.control}
+                                name="level"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select a level" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="A1">A1</SelectItem>
+                                        <SelectItem value="A2">A2</SelectItem>
+                                        <SelectItem value="B1">B1</SelectItem>
+                                        <SelectItem value="B2">B2</SelectItem>
+                                        <SelectItem value="C1">C1</SelectItem>
+                                        <SelectItem value="C2">C2</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <DialogFooter>
+                                <DialogClose asChild>
+                                  <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
+                                  >
+                                    Submit
+                                  </Button>
+                                </DialogClose>
+                              </DialogFooter>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                 </form>
               </Form>
             </div>
+
             {/* Generate it by AI */}
-            <div className="mt-12">
+            {/* <div className="mt-12">
               <Collapsible open={aiFormIsOpen} onOpenChange={setAiFormIsOpen}>
                 <CollapsibleTrigger asChild>
                   <Button
@@ -413,7 +512,8 @@ const AddCard: React.FC = () => {
                   </Form>
                 </CollapsibleContent>
               </Collapsible>
-            </div>
+            </div> */}
+
             {/* upload CSV */}
             {/* <div className="mt-12">
               <Collapsible>
