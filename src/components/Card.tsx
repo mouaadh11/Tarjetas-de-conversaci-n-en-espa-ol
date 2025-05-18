@@ -70,12 +70,14 @@ const Card: React.FC<CardProps> = ({
     >
       <div>
         <div className="absolute top-2 right-2">
-          {showCheckbox && <Checkbox
-            checked={selectedIds.includes(id)}
-            onCheckedChange={(checked: boolean) =>
-              handleCardSelection(id, checked)
-            }
-          />}
+          {showCheckbox && (
+            <Checkbox
+              checked={selectedIds.includes(id)}
+              onCheckedChange={(checked: boolean) =>
+                handleCardSelection(id, checked)
+              }
+            />
+          )}
         </div>
         {category != "indefinida" ? (
           <span className="inline-block px-3 py-1 text-xs font-semibold text-cardBlue-700 bg-cardBlue-100 rounded-full mb-3">
@@ -166,7 +168,10 @@ const Card: React.FC<CardProps> = ({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-red-400 hover:bg-red-500"
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>

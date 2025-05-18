@@ -37,6 +37,13 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -344,21 +351,34 @@ const AddCard: React.FC = () => {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-cardBlue-200 text-cardBlue-700 hover:bg-cardBlue-500"
+                      className=" bg-cardBlue-700 hover:bg-cardBlue-200 hover:text-black"
                     >
                       Agregar tarjeta
                     </Button>
                     <div className="flex flex-row gap-3">
                       {isSubmitting && <Spinner />}
+                      {/* unexpected behaviour working to fix */}
                       <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="default"
-                            className="flex flex-row items-center bg-cardBlue-200 hover:bg-cardBlue-500 text-black"
-                          >
-                            Generate it by AI
-                            <Sparkles className="ml-auto" />
-                          </Button>
+                        <DialogTrigger asChild disabled>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <Button
+                                    variant="default"
+                                    className="flex flex-row items-center bg-black hover:bg-cardBlue-700 text-white"
+                                    disabled
+                                  >
+                                    Generate by AI
+                                    <Sparkles className="ml-auto text-cardBlue-200" />
+                                  </Button>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>working on it ...</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                           <DialogHeader>

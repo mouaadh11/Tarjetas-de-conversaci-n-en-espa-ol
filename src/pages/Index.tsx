@@ -109,6 +109,7 @@ const Index = () => {
         variant: "destructive",
       });
     }
+    toggleReveal();
   };
   const handleMultiDelete = async () => {
     // Optional: show confirm dialog
@@ -167,9 +168,8 @@ const Index = () => {
                           Are you absolutely sure?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete your account and remove your data from our
-                          servers.
+                        This action cannot be undone. This will permanently delete the
+                        card and remove it form your card list.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -177,6 +177,7 @@ const Index = () => {
                         <AlertDialogAction asChild>
                           <Button
                             variant="destructive"
+                            className="bg-red-400 hover:bg-red-500"
                             onClick={
                               !showCheckbox
                                 ? toggleShowCheckbox

@@ -5,38 +5,47 @@ import { AzureKeyCredential } from "@azure/core-auth";
 import OpenAI from "openai";
 import { env } from "process";
 
+// const token = import.meta.env.VITE_GITHUB_TOKEN;
+// const endpoint = "https://models.github.ai/inference";
+// const model = "deepseek/DeepSeek-V3-0324";
 const token = import.meta.env.VITE_GITHUB_TOKEN;
 const endpoint = "https://models.github.ai/inference";
-const model = "deepseek/DeepSeek-V3-0324";
-
-// const endpoint = "https://models.github.ai/inference";
-// const model = "openai/gpt-4.1";
+const model = "openai/gpt-4.1";
 
 export const generatecardByAi = async (level: string, category: string) => {
-  // const client = new OpenAI({
-  //   baseURL: endpoint,
-  //   apiKey: token,
-  //   dangerouslyAllowBrowser: true,
-  // });
-  // const response = await client.chat.completions.create({
-  //   messages: [
-  //     {
-  //       role: "system",
-  //       content:
-  //         'you are an object Json generator, in this form { "spanish_text": \n "english_text": \n "russian_text": \n "category":}',
-  //     },
-  //     {
-  //       role: "user",
-  //       content: `generate question to learn spanish for ${level} A1 in theme ${category}, the response should be in a Json form and if the theme is set to "Random" keep the field empty`,
-  //     },
-  //   ],
-  //   temperature: 1,
-  //   top_p: 1,
-  //   model: model,
-  // });
-  const client = ModelClient(endpoint, new AzureKeyCredential(token));
-  console.log(category, level);
   const noise = Math.random().toString(36).substring(2, 7);
+  const client = ModelClient(endpoint, new AzureKeyCredential(token));
+
+  //   const response = await client.chat.completions.create({
+  //     messages: [
+  //       {
+  //         role: "system",
+  //         content: `You are a helpful and so creative assistant and every time you generate a new ideas and questions more fun even if it is the same prompt, Each response must be different from any previous example. Avoid repeating previous categories or sentence structures. Be surprising! generate ONLY JSON output. The format should always be:
+
+  //   {
+  //     "spanish_text": "...",
+  //     "english_text": "...",
+  //     "russian_text": "...",
+  //     "category": "..."
+  //   }
+
+  //   Do not include any explanation or extra text. Return ONLY the JSON object.`,
+  //       },
+  //       {
+  //         role: "user",
+  //         content: `- Request ID: ${noise}, Generate a different simple conversational Spanish learning question for level ${level} (e.g., A1). Theme: ${category}.
+
+  // If the theme is "Random", choose a random topic appropriate for the level.
+
+  //   - If the theme is "Random", change the "category" field to a real category.
+  //   - Translate the question into English and Russian.
+  //   - Output ONLY the JSON object.`,
+  //       },
+  //     ],
+  //     temperature: 1,
+  //     top_p: 1,
+  //     model: model,
+  //   });
   const response = await client.path("/chat/completions").post({
     body: {
       messages: [
@@ -58,15 +67,15 @@ export const generatecardByAi = async (level: string, category: string) => {
           content: `- Request ID: ${noise}, Generate a different simple conversational Spanish learning question for level ${level} (e.g., A1). Theme: ${category}.
   
 If the theme is "Random", choose a random topic appropriate for the level.
-          
+
+  - if the question is short ask about why or the motivations
   - If the theme is "Random", change the "category" field to a real category. 
   - Translate the question into English and Russian.
   - Output ONLY the JSON object.`,
         },
       ],
-      temperature: 1.0, // more creativity
+      temperature: 1,
       top_p: 1,
-      max_tokens: 2048,
       model: model,
     },
   });
@@ -75,9 +84,53 @@ If the theme is "Random", choose a random topic appropriate for the level.
     throw response.body.error;
   }
 
-  console.log(response.body.choices[0].message.content, noise);
-  const generatedCard = response.body.choices[0].message.content;
-  return generatedCard.replace(/```json|```/g, "").trim();
+  console.log(response.body.choices[0].message.content);
+  return response.body.choices[0].message.content;
+
+  //   const client = ModelClient(endpoint, new AzureKeyCredential(token));
+  //   console.log(category, level);
+  //   const noise = Math.random().toString(36).substring(2, 7);
+  //   const response = await client.path("/chat/completions").post({
+  //     body: {
+  //       messages: [
+  //         {
+  //           role: "system",
+  //           content: `You are a helpful and so creative assistant and every time you generate a new ideas and questions more fun even if it is the same prompt, Each response must be different from any previous example. Avoid repeating previous categories or sentence structures. Be surprising! generate ONLY JSON output. The format should always be:
+
+  //   {
+  //     "spanish_text": "...",
+  //     "english_text": "...",
+  //     "russian_text": "...",
+  //     "category": "..."
+  //   }
+
+  //   Do not include any explanation or extra text. Return ONLY the JSON object.`,
+  //         },
+  //         {
+  //           role: "user",
+  //           content: `- Request ID: ${noise}, Generate a different simple conversational Spanish learning question for level ${level} (e.g., A1). Theme: ${category}.
+
+  // If the theme is "Random", choose a random topic appropriate for the level.
+
+  //   - If the theme is "Random", change the "category" field to a real category.
+  //   - Translate the question into English and Russian.
+  //   - Output ONLY the JSON object.`,
+  //         },
+  //       ],
+  //       temperature: 1.0, // more creativity
+  //       top_p: 1,
+  //       max_tokens: 2048,
+  //       model: model,
+  //     },
+  //   });
+
+  //   if (isUnexpected(response)) {
+  //     throw response.body.error;
+  //   }
+
+  //   console.log(response.body.choices[0].message.content, noise);
+  //   const generatedCard = response.body.choices[0].message.content;
+  //   return generatedCard.replace(/```json|```/g, "").trim();
 };
 
 export const fetchRandomCardByCategory = async (
