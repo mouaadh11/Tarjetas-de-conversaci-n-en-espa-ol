@@ -1,8 +1,10 @@
+import { useIsMobile } from "@/hooks/use-mobile";
 import { FilePlus2, House } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
 const Header: React.FC = () => {
+  const isMobile = useIsMobile();
   return (
     <header className="py-6">
       <div className="container">
@@ -19,15 +21,15 @@ const Header: React.FC = () => {
             to="/"
             className="flex flex-row gap-2 items-center px-4 py-2 text-gray-600 hover:text-cardBlue-700 font-bold text-xl"
           >
-            
-                <House />
-                pagina principal
+            <House />
+            {!isMobile && "pagina principal"}
           </Link>
           <Link
             to="/add"
             className="flex flex-row gap-2 px-4 py-2 text-gray-600 hover:text-cardBlue-700 font-bold text-xl"
           >
-            <FilePlus2 /> agregar tarjeta
+            <FilePlus2 />
+            {!isMobile && "agregar tarjeta"}
           </Link>
         </nav>
       </div>

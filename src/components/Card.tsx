@@ -270,7 +270,7 @@ const Card: React.FC<CardProps> = ({
                   <Pencil />
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-h-[90vh] overflow-y-auto w-[90vw] md:w-full">
                 <DialogHeader>
                   <DialogTitle>Edit Card</DialogTitle>
                   <DialogDescription asChild>

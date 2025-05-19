@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import Header from "@/components/Header";
 import CardGrid from "@/components/CardGrid";
 import RandomCard from "@/components/RandomCard";
@@ -20,12 +21,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { CardProvider } from "@/context/CardContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRevealed, setIsRevealed] = useState(false);
   const [showCheckbox, setShowCheckbox] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     loadCards();
@@ -113,7 +116,6 @@ const Index = () => {
     toggleReveal();
   };
   const handleMultiDelete = async () => {
-    // Optional: show confirm dialog
     await deleteCardsByIds(selectedIds);
     console.log(selectedIds);
     setSelectedIds([]);
@@ -143,11 +145,13 @@ const Index = () => {
                 >
                   {isRevealed ? (
                     <>
-                      <EyeOff className="h-4 w-4 mr-1" /> Hide Todas
+                      <EyeOff className="h-4 w-4 mr-1" />{" "}
+                      {!isMobile && "Hide Todas"}
                     </>
                   ) : (
                     <>
-                      <Eye className="h-4 w-4 mr-1" /> Reveal Todas
+                      <Eye className="h-4 w-4 mr-1" />{" "}
+                      {!isMobile && "Reveal Todas"}
                     </>
                   )}
                 </Button>
@@ -160,7 +164,8 @@ const Index = () => {
                         onClick={selectedIds.length === 0 && handleMultiDelete}
                       >
                         <Trash2 />
-                        Delete Selected ({selectedIds.length})
+                        {!isMobile &&
+                        "Delete Selected" + (selectedIds.length)}
                       </Button>
                     </AlertDialogTrigger>
                     {selectedIds.length !== 0 && (
@@ -170,8 +175,8 @@ const Index = () => {
                             Are you absolutely sure?
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete
-                            the card and remove it form your card list.
+                            This action cannot be undone. This will permanently
+                            delete the card and remove it form your card list.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -197,7 +202,7 @@ const Index = () => {
                 ) : (
                   <Button variant="destructive" onClick={toggleShowCheckbox}>
                     <Trash2 />
-                    Delete
+                    {!isMobile &&"Delete"}
                   </Button>
                 )}
 
