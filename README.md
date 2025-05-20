@@ -27,9 +27,10 @@ It’s my way of practicing:
 ## 🛠️ How to Run Locally
 
 ```bash
-git clone 
+git clone https://github.com/mouaadh11/Tarjetas-de-conversaci-n-en-espa-ol.git
 cd Tarjetas-de-conversaci-n-en-espa-ol
 npm install
 npm run dev
 ```
-## Deployement link: (https://tarjetas-de-conversacion-en-espaol.vercel.app/)
+## Deployement link: 
+(https://tarjetas-de-conversacion-en-espaol.vercel.app/)
