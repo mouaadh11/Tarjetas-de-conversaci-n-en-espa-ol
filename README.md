@@ -1,73 +1,35 @@
-# Welcome to your Lovable project
+# Spanish Conversation Cards (A1 Level)
 
-## Project info
+This is a simple project that displays Spanish conversation cards designed for A1 learners. The idea is to help users practice everyday conversation through short and easy prompts.
 
-**URL**: https://lovable.dev/projects/59afa727-28ae-4e95-99f6-aab9a375557c
+## 🧠 About This Project
 
-## How can I edit this code?
+I’m a beginner learning **React**, and I created this project to build my skills while making something useful for language learners.
 
-There are several ways of editing your application.
+The initial codebase was generated using [Lovable](https://lovable.dev/projects/59afa727-28ae-4e95-99f6-aab9a375557c), but the result was non-functional. I took it as a challenge to fix the issues and continue building on top of it to better understand React and related tools.
 
-**Use Lovable**
+It’s my way of practicing:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/59afa727-28ae-4e95-99f6-aab9a375557c) and start prompting.
+- React fundamentals
+- TypeScript
+- Tailwind CSS for styling
+- shadcn-ui for reusable UI components
+- Vite for fast development
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Tech Stack
 
-**Use your preferred IDE**
+- **React**
+- **TypeScript**
+- **Tailwind CSS**
+- **shadcn-ui**
+- **Vite**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠️ How to Run Locally
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+git clone 
+cd Tarjetas-de-conversaci-n-en-espa-ol
+npm install
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/59afa727-28ae-4e95-99f6-aab9a375557c) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Deployement link: (https://tarjetas-de-conversacion-en-espaol.vercel.app/)
