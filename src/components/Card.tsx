@@ -174,11 +174,8 @@ const Card: React.FC<CardProps> = ({
           </span>
         )}
         <h3
-          className={cn(
-            "text-xl font-semibold mb-4 transition-all duration-300",
-            !localRevealed && "blurred",
-            localRevealed && "animate-card-reveal"
-          )}
+          className={
+            "text-xl font-semibold mb-4 transition-all duration-300"}
         >
           {spanish_text}
         </h3>

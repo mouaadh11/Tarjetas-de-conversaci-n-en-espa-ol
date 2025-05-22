@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Card } from "@/types/card";
 import CsvForm from "@/components/Csvform";
 import {
@@ -27,6 +32,7 @@ import Papa from "papaparse";
 import {
   addCard,
   addCardsFromCSV,
+  fetchCategories,
   generatecardByAi,
 } from "@/services/cardService";
 import { toast } from "@/hooks/use-toast";
@@ -79,6 +85,13 @@ import { useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Sparkles } from "lucide-react";
 import { DialogClose } from "@radix-ui/react-dialog";
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 const AddCard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,6 +101,13 @@ const AddCard: React.FC = () => {
   >([]);
   const [aiFormIsOpen, setAiFormIsOpen] = useState(false);
   const [csvError, setCsvError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchCategories()
+      .then(setCategories)
+      .catch((e) => console.error("Error fetching categories", e));
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -155,7 +175,7 @@ const AddCard: React.FC = () => {
         spanish_text: values.spanish_text,
         english_text: values.english_text || undefined,
         russian_text: values.russian_text || undefined,
-        category: values.category || "indefinida",
+        category: values.category.toLowerCase() || "indefinida",
       });
 
       toast({
@@ -333,8 +353,190 @@ const AddCard: React.FC = () => {
                       </FormItem>
                     )}
                   />
+                  {/* <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => {
+                      const [open, setOpen] = useState(false);
+                      const [inputValue, setInputValue] = useState(
+                        field.value || ""
+                      );
 
+                      // Filter suggestions based on typed input
+                      const filteredCategories = categories.filter((cat) => {
+                        const result =
+                          cat
+                            .toLowerCase()
+                            .includes(inputValue.toLowerCase()) &&
+                          cat.toLowerCase() !== inputValue.toLowerCase();
+                        console.log(result);
+                        return result;
+                      });
+
+                      return (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Categoría (opcional)</FormLabel>
+
+                          <div className="relative">
+                            <Input
+                              value={inputValue}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setInputValue(value);
+                                field.onChange(value);
+                                setOpen(true);
+                              }}
+                              onFocus={() => {
+                                console.log(filteredCategories.length)
+                                if (filteredCategories.length > 0)
+                                  setOpen(true);
+                              }}
+                              placeholder="Introductions"
+                            />
+
+                            {(open && filteredCategories.length > 0) && (
+                              <Popover open={open} onOpenChange={setOpen}>
+                                
+                                <PopoverContent className="w-full mt-1 p-0">
+                                  <Command>
+                                    <CommandList>
+                                      {filteredCategories.map((cat) => (
+                                        <CommandItem
+                                          key={cat}
+                                          onSelect={() => {
+                                            setInputValue(cat);
+                                            field.onChange(cat);
+                                            setOpen(false);
+                                          }}
+                                        >
+                                          {cat}
+                                        </CommandItem>
+                                      ))}
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  /> */}
                   <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => {
+                      const [inputValue, setInputValue] = useState(
+                        field.value || ""
+                      );
+                      const [open, setOpen] = useState(false);
+
+                      const filteredCategories = categories.filter((cat) => {
+                        return (
+                          cat
+                            .toLowerCase()
+                            .includes(inputValue.toLowerCase()) &&
+                          cat.toLowerCase() !== inputValue.toLowerCase()
+                        );
+                      });
+
+                      return (
+                        <FormItem className="flex flex-col relative">
+                          <FormLabel>Categoría (opcional)</FormLabel>
+
+                          <Input
+                            value={inputValue}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setInputValue(value);
+                              field.onChange(value);
+                              setOpen(true);
+                            }}
+                            onFocus={() => {
+                              if (filteredCategories.length > 0) setOpen(true);
+                            }}
+                            onBlur={() => {
+                              // Delay closing to allow click on item
+                              setTimeout(() => setOpen(false), 150);
+                            }}
+                            placeholder="Introductions"
+                          />
+
+                          {open && filteredCategories.length > 0 && (
+                            <div className="absolute z-10 top-full mt-1 w-full rounded-md border bg-white shadow-md">
+                              {filteredCategories.map((cat) => (
+                                <div
+                                  key={cat}
+                                  onMouseDown={() => {
+                                    // onMouseDown to avoid blur before selection
+                                    setInputValue(cat);
+                                    field.onChange(cat);
+                                    setOpen(false);
+                                  }}
+                                  className="cursor-pointer px-3 py-2 hover:bg-gray-100"
+                                >
+                                  {cat}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  {/* <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => {
+                      const [open, setOpen] = useState(false);
+
+                      return (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Categoría (opcional)</FormLabel>
+                          <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ||
+                                  "Selecciona o escribe una categoría"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[300px] p-0">
+                              <Command>
+                                <CommandInput placeholder="Buscar categoría..." />
+                                <CommandList>
+                                  {categories.map((category) => (
+                                    <CommandItem
+                                      key={category}
+                                      value={category}
+                                      onSelect={(value) => {
+                                        field.onChange(value);
+                                        setOpen(false);
+                                      }}
+                                    >
+                                      {category}
+                                    </CommandItem>
+                                  ))}
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  /> */}
+                  {/* <FormField
                     control={form.control}
                     name="category"
                     render={({ field }) => (
@@ -346,7 +548,8 @@ const AddCard: React.FC = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
+
                   <div className="flex flex-row-reverse justify-between items-center">
                     <Button
                       type="submit"

@@ -7,7 +7,7 @@ import { fetchCards, deleteCard } from "@/services/cardService";
 import { Card } from "@/types/card";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowDownWideNarrow, Eye, EyeOff, Trash2 } from "lucide-react";
+import { ArrowDownWideNarrow, Eye, EyeOff, Menu, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
@@ -20,6 +20,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { CardProvider } from "@/context/CardContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -136,22 +142,59 @@ const Index = () => {
                 <span className="bg-cardBlue-700 w-1.5 h-6 rounded mr-2 inline-block"></span>
                 Todas las tarjetas
               </h2>
-              <div className="flex flex-row-reverse gap-3">
+              <div className="flex flex-row-reverse gap-1 md:gap-3">
+              <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={toggleReveal}
+                      >
+                        {isRevealed ? (
+                          <>
+                            <EyeOff className="h-4 w-4 mr-1" /> {"Hide Todas"}
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="h-4 w-4 mr-1" /> {"Reveal Todas"}
+                          </>
+                        )}
+                      </Button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Button
+                        variant="outline"
+                        className="border-red-400 w-[100%]"
+                        onClick={toggleShowCheckbox}
+                      >
+                        <Trash2 className="text-red-400 !w-4 !h-4" />
+                        {"Delete"}
+                      </Button>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="flex items-center gap-1"
+                  className="items-center gap-1 hidden md:flex"
                   onClick={toggleReveal}
                 >
                   {isRevealed ? (
                     <>
-                      <EyeOff className="h-4 w-4 mr-1" />{" "}
-                      {!isMobile && "Hide Todas"}
+                      <EyeOff className="h-4 w-4 mr-1" /> {"Hide Todas"}
                     </>
                   ) : (
                     <>
-                      <Eye className="h-4 w-4 mr-1" />{" "}
-                      {!isMobile && "Reveal Todas"}
+                      <Eye className="h-4 w-4 mr-1" /> {"Reveal Todas"}
                     </>
                   )}
                 </Button>
@@ -164,8 +207,7 @@ const Index = () => {
                         onClick={selectedIds.length === 0 && handleMultiDelete}
                       >
                         <Trash2 />
-                        {!isMobile &&
-                        "Delete Selected" + (selectedIds.length)}
+                        {!isMobile && "Delete Selected" + selectedIds.length}
                       </Button>
                     </AlertDialogTrigger>
                     {selectedIds.length !== 0 && (
@@ -200,9 +242,13 @@ const Index = () => {
                     )}
                   </AlertDialog>
                 ) : (
-                  <Button variant="destructive" onClick={toggleShowCheckbox}>
-                    <Trash2 />
-                    {!isMobile &&"Delete"}
+                  <Button
+                    variant="outline"
+                    className="border-red-400 hidden md:flex"
+                    onClick={toggleShowCheckbox}
+                  >
+                    <Trash2 className="text-red-400 !w-4 !h-4" />
+                    {!isMobile && "Delete"}
                   </Button>
                 )}
 
@@ -219,6 +265,7 @@ const Index = () => {
                   </Button>
                 )}
               </div>
+              
             </div>
 
             {isLoading ? (

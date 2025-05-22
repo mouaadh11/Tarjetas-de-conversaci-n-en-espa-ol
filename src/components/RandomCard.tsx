@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 
-
 interface RandomCardProps {
   onDeleteCard?: (id: string) => void;
 }
@@ -82,8 +81,7 @@ const RandomCard: React.FC<RandomCardProps> = ({ onDeleteCard }) => {
           description: "There is no more cards in this categery",
           variant: "destructive",
         });
-      }
-      else if (fetchedCard?.id) {
+      } else if (fetchedCard?.id) {
         const card = fetchedCard;
         setRandomCard(card);
         toast({
@@ -125,6 +123,18 @@ const RandomCard: React.FC<RandomCardProps> = ({ onDeleteCard }) => {
               }}
               
             />
+            {/* <div className="rounded-2xl shadow-md p-4 bg-white hover:shadow-lg transition-all">
+              <div className="bg-yellow-100 text-yellow-800">🎵 Music</div>
+              <h2 className="text-xl font-semibold mt-2">
+                ¿Cuál es tu canción favorita y por qué?
+              </h2>
+              <p className="text-gray-500 text-sm mt-1">
+                What is your favorite song and why?
+              </p>
+              <Button className="mt-3" variant="ghost">
+                👁 Reveal
+              </Button>
+            </div> */}
           </div>
         </div>
       )}
