@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { session } from "@/services/userService";
 
 interface RandomCardProps {
   onDeleteCard?: (id: string) => void;
@@ -36,9 +37,10 @@ const RandomCard: React.FC<RandomCardProps> = ({ onDeleteCard }) => {
   }, []);
 
   const loadCategories = async () => {
+    const sessionData = await session();
     setIsLoading(true);
     try {
-      const categoriesFectched = await fetchCategories();
+      const categoriesFectched = await fetchCategories(sessionData.id);
       setCategories(categoriesFectched);
       // console.log(categoriesFectched);
     } catch (error) {
@@ -58,6 +60,8 @@ const RandomCard: React.FC<RandomCardProps> = ({ onDeleteCard }) => {
   };
 
   const getRandomCard = async () => {
+    const sessionData = await session();
+
     setIsLoading(true);
     try {
       let fetchedCard = null;
@@ -66,7 +70,7 @@ const RandomCard: React.FC<RandomCardProps> = ({ onDeleteCard }) => {
         fetchedCard =
           position === "all"
             ? await fetchRandomCard()
-            : await fetchRandomCardByCategory(position);
+            : await fetchRandomCardByCategory(position , sessionData.id);
         console.log(fetchedCard);
         atempts--;
         console.log(atempts);

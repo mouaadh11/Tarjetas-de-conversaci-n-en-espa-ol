@@ -18,7 +18,7 @@ const Header: React.FC = () => {
 
         <nav className="flex justify-center mt-6 space-x-4">
           <Link
-            to="/"
+            to="/home"
             className="flex flex-row gap-2 items-center px-4 py-2 text-gray-600 hover:text-cardBlue-700 font-bold text-xl"
           >
             <House />

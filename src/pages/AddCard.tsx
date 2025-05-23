@@ -92,6 +92,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { session } from "@/services/userService";
 
 const AddCard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,9 +105,17 @@ const AddCard: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchCategories()
-      .then(setCategories)
-      .catch((e) => console.error("Error fetching categories", e));
+    const fetchData = async () => {
+      try {
+        const sessionData = await session();
+        const categories = await fetchCategories(sessionData.id);
+        setCategories(categories);
+      } catch (e) {
+        console.error("Error fetching categories", e);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const form = useForm<FormValues>({
@@ -169,9 +178,11 @@ const AddCard: React.FC = () => {
     }
   };
   const onSubmit = async (values: FormValues) => {
+    const sessionData = await session();
     setIsSubmitting(true);
     try {
       await addCard({
+        user_id: sessionData.id,
         spanish_text: values.spanish_text,
         english_text: values.english_text || undefined,
         russian_text: values.russian_text || undefined,
