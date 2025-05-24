@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Languages, Sparkles, UserPlus } from "lucide-react";
+import {
+  CheckCircle,
+  Languages,
+  LogIn,
+  Sparkles,
+  UserPlus,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function LandingPage() {
@@ -22,7 +28,10 @@ export default function LandingPage() {
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link to="/login">Inicio sesion</Link>
+            <Link to="/login">
+              <LogIn className="mr-2 h-4 w-4" />
+              Inicio sesion
+            </Link>
           </Button>
         </div>
       </section>
