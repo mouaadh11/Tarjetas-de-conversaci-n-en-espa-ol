@@ -28,8 +28,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CardProvider } from "@/context/CardContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { session } from "@/services/userService";
 
-const Index = () => {
+const Home = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -43,7 +44,10 @@ const Index = () => {
   const loadCards = async () => {
     try {
       setIsLoading(true);
-      const fetchedCards = await fetchCards();
+      const sessionData = await session();
+      console.log(sessionData);
+      const fetchedCards = await fetchCards(sessionData.id);
+      console.log(fetchedCards)
       setCards(fetchedCards);
     } catch (error) {
       console.error("Error loading cards:", error);
@@ -59,7 +63,8 @@ const Index = () => {
 
   const handleDeleteCard = async (id: string) => {
     try {
-      await deleteCard(id);
+      const sessionData = await session();
+      await deleteCard(id, sessionData.id);
       setCards(cards.filter((card) => card.id !== id));
       toast({
         title: "Success",
@@ -92,8 +97,11 @@ const Index = () => {
   const deleteCardsByIds = async (selectedIds) => {
     if (selectedIds.length !== 0) {
       try {
+        const sessionData = await session();
         // Wait for all deletions to complete
-        await Promise.all(selectedIds.map((cardId) => deleteCard(cardId)));
+        await Promise.all(
+          selectedIds.map((cardId) => deleteCard(cardId, sessionData.id))
+        );
 
         // Remove all deleted cards from the state in one go
         setCards((prevCards) =>
@@ -143,45 +151,45 @@ const Index = () => {
                 Todas las tarjetas
               </h2>
               <div className="flex flex-row-reverse gap-1 md:gap-3">
-              <div className="md:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <Menu className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="flex items-center gap-1"
-                        onClick={toggleReveal}
-                      >
-                        {isRevealed ? (
-                          <>
-                            <EyeOff className="h-4 w-4 mr-1" /> {"Hide Todas"}
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-4 w-4 mr-1" /> {"Reveal Todas"}
-                          </>
-                        )}
+                <div className="md:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <Menu className="h-5 w-5" />
                       </Button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="outline"
-                        className="border-red-400 w-[100%]"
-                        onClick={toggleShowCheckbox}
-                      >
-                        <Trash2 className="text-red-400 !w-4 !h-4" />
-                        {"Delete"}
-                      </Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex items-center gap-1"
+                          onClick={toggleReveal}
+                        >
+                          {isRevealed ? (
+                            <>
+                              <EyeOff className="h-4 w-4 mr-1" /> {"Hide Todas"}
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="h-4 w-4 mr-1" /> {"Reveal Todas"}
+                            </>
+                          )}
+                        </Button>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Button
+                          variant="outline"
+                          className="border-red-400 w-[100%]"
+                          onClick={toggleShowCheckbox}
+                        >
+                          <Trash2 className="text-red-400 !w-4 !h-4" />
+                          {"Delete"}
+                        </Button>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -265,7 +273,6 @@ const Index = () => {
                   </Button>
                 )}
               </div>
-              
             </div>
 
             {isLoading ? (
@@ -289,4 +296,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Home;

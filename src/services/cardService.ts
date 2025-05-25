@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/types/card";
 import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
+import { UUID } from "crypto";
 import OpenAI from "openai";
 import { env } from "process";
 
@@ -135,14 +136,16 @@ If the theme is "Random", choose a random topic appropriate for the level.
 };
 
 export const fetchRandomCardByCategory = async (
-  category: string
+  category: string,
+  userId: string
 ): Promise<Card | null> => {
   const { data, error } = await supabase
     .from("cards")
     .select("*")
+    .eq("user_id", userId)
     .eq("category", category)
     .order("created_at", { ascending: false }); // optional ordering
-
+    
   if (error) {
     console.error("Error fetching cards by category:", error);
     return null;
@@ -155,10 +158,11 @@ export const fetchRandomCardByCategory = async (
   return data[randomIndex];
 };
 
-export const fetchCategories = async (): Promise<string[]> => {
+export const fetchCategories = async (userId: string): Promise<string[]> => {
   const { data, error } = await supabase
     .from("cards")
     .select("category", { count: "exact", head: false })
+    .eq("user_id", userId) // filter by logged-in user
     .neq("category", null)
     .order("category", { ascending: true });
 
@@ -173,10 +177,11 @@ export const fetchCategories = async (): Promise<string[]> => {
   return uniqueCategories;
 };
 
-export const fetchCards = async (): Promise<Card[]> => {
+export const fetchCards = async (userId: string): Promise<Card[]> => {
   const { data, error } = await supabase
     .from("cards")
     .select("*")
+    .eq("user_id", userId) // filter by logged-in user
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -199,7 +204,7 @@ export const fetchRandomCard = async (): Promise<Card | null> => {
 };
 
 export const addCard = async (
-  card: Omit<Card, "id" | "created_at">
+  card: Omit<Card, "id" | "created_at">,
 ): Promise<Card | null> => {
   const { data, error } = await supabase
     .from("cards")
@@ -215,13 +220,15 @@ export const addCard = async (
   return data;
 };
 export const updateCard = async (
+  userId: string,
   id: string,
   updatedFields: Partial<Omit<Card, "id" | "created_at">>
 ): Promise<Card | null> => {
-  console.log(id, updatedFields)
+  console.log(id, updatedFields);
   const { data, error } = await supabase
     .from("cards")
     .update(updatedFields)
+    .eq("user_id", userId)
     .eq("id", id)
     .select()
     .single();
@@ -234,8 +241,12 @@ export const updateCard = async (
   return data;
 };
 
-export const deleteCard = async (id: string): Promise<void> => {
-  const { error } = await supabase.from("cards").delete().eq("id", id);
+export const deleteCard = async (id: string, userId: string): Promise<void> => {
+  const { error } = await supabase
+    .from("cards")
+    .delete()
+    .eq("user_id", userId) // filter by logged-in user
+    .eq("id", id);
 
   if (error) {
     console.error("Error deleting card:", error);
